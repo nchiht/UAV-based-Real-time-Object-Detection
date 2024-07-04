@@ -1,0 +1,7 @@
+pyarrow==16.1.0
+kafka-python==2.0.2
+pyspark==3.5.1
+opencv-python==4.10.0.84
+ipython==8.26.0
+ultralytics==8.2.48
+Flask==3.0.3

@@ -6,3 +6,4 @@ ipython==8.26.0
 ultralytics==8.2.48
 Flask==3.0.3
 findspark==2.0.1
+python-dotenv=1.0.1

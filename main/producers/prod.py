@@ -6,13 +6,19 @@ from json import dumps, loads
 from time import sleep
 from kafka import KafkaProducer
 logging.basicConfig(level=logging.INFO)
+from _constants import *
+
+# from dotenv import load_dotenv
+# load_dotenv()
+
+# kafka_server = os.getenv('KAFKA_SERVER')
 
 
 # Video Generation
 def generate_video(image_folder):
     # image_folder = '/home/cthi/UIT/IE212/UAV-benchmark-M/M0101'
     folder_name = image_folder.split('/')[-1]
-    video_path = 'videos/' + folder_name + '.mp4'
+    video_path = 'data/videos/' + folder_name + '.mp4'
 
     print(video_path)
 
@@ -38,12 +44,12 @@ def publish_camera(topic, imgs):
     video_path = generate_video(imgs)
 
     # Create producer
-    producer = KafkaProducer(bootstrap_servers='localhost:9092')
+    producer = KafkaProducer(bootstrap_servers=kafka_server)
     video = cv2.VideoCapture(video_path)
     
     # Send frames of generated video
+    print(f'Publishing {topic}')
     try:
-        print(f'Publishing {topic}')
         k = 1
         while(True):    
             __, frame = video.read()

@@ -1,0 +1,32 @@
+<!-- <!doctype html>
+<html>
+    <head>
+        <title>Home page</title>
+        </head>
+    <body>
+        <h1>Homepage</h1>
+        {% for x in range(10) %}
+            {% if x%2 == 1%}
+                <p>{{x}}</p>
+            {% endif %}
+        {% endfor %}
+        
+    </body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UAV Detect</title>
+    <link rel="stylesheet" type="text/css"  href ="{{url_for('static', filename='styles.css')}}"/>
+  </head>
+  <body>
+    <h1>Home</h1>
+    <button onclick="window.location.href='{{ url_for('UAV1') }}'">Go to UAV1</button>
+    <button onclick="window.location.href='{{ url_for('UAV2') }}'">Go to UAV2</button>
+    <button onclick="window.location.href='{{ url_for('UAV3') }}'">Go to UAV3</button>
+  </body>
+</html>

@@ -1,7 +1,5 @@
 import logging
 import sys
-import time
-import csv
 import cv2
 import os
 from json import dumps, loads

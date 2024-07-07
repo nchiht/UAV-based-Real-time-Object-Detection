@@ -3,7 +3,7 @@ findspark.init()
 
 # Standard library imports
 from time import sleep
-# from _constants import *
+from _constants import *
 
 # Third-party imports
 import numpy as np
@@ -18,21 +18,6 @@ from pyspark.sql.functions import col, udf
 from pyspark.sql.streaming import DataStreamReader
 from pyspark.sql.types import BinaryType
 
-
-# Kafka's Information
-kafka_server = 'localhost:9092'
-
-topic_in_1 = 'drone_1'
-topic_in_2 = 'drone_2'
-topic_in_3 = 'drone_3'
-
-topic_out_1 = 'UAV_1'
-topic_out_2 = 'UAV_2'
-topic_out_3 = 'UAV_3'
-
-# Spark Configuration
-scala_version = '2.12'
-spark_version = '3.5.1'
 
 packages = [
     f'org.apache.spark:spark-sql-kafka-0-10_{scala_version}:{spark_version}',
@@ -57,7 +42,7 @@ conf=SparkConf()
 
 print(spark)
 
-yolo = YOLO("params/pt_yolov5n.pt")
+yolo = YOLO("../params/pt_yolov5n.pt")
 # yolo = YOLO("../params/pt_yolov8s.pt") 
 # yolo = YOLO("../params/pt_yolov8n.pt")  
 
@@ -81,7 +66,7 @@ def predict(frame_bytes):
 
 predict_udf = udf(predict, BinaryType())
 
-def queryWriter(topic_in, topic_out):
+def queryWriter(topic_in, topic_out, checkpointPath):
     streamRawDF = spark.readStream.format("kafka").option("kafka.bootstrap.servers", kafka_server).option("subscribe", topic_in).option("startingOffsets","latest").load()
 
     streamRawDF = streamRawDF.withColumn('value1', col('value'))
@@ -90,16 +75,21 @@ def queryWriter(topic_in, topic_out):
 
     query = streamRawDF.writeStream \
     .format("kafka") \
-    .trigger(processingTime="2 seconds") \
     .option("kafka.bootstrap.servers", kafka_server) \
     .option('topic', topic_out) \
-    .option("checkpointLocation", f'checkpoint/' + topic_out) \
-    .start()
+    .option("checkpointLocation", f'../checkpoint/' + checkpointPath) \
+    # .trigger(processingTime="3 seconds")
 
     return query
 
-query_1 = queryWriter(topic_in_1, topic_out_1)
-query_2 = queryWriter(topic_in_2, topic_out_2)
-query_3 = queryWriter(topic_in_3, topic_out_3)
+checkpoint_1 = 'uav1'
+checkpoint_2 = 'uav2'
+checkpoint_3 = 'uav3'
 
-query_3.awaitTermination()
+query_1 = queryWriter(topic_in_1, topic_out_1, checkpoint_1)
+query_2 = queryWriter(topic_in_2, topic_out_2, checkpoint_2)
+query_3 = queryWriter(topic_in_3, topic_out_3, checkpoint_3)
+
+query_1.start() 
+query_2.start()
+query_3.start()

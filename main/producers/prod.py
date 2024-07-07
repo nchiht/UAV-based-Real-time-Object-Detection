@@ -6,14 +6,13 @@ from json import dumps, loads
 from time import sleep
 from kafka import KafkaProducer
 logging.basicConfig(level=logging.INFO)
-# from _constants import *
+from _constants import *
 
 # from dotenv import load_dotenv
 # load_dotenv()
 
 # kafka_server = os.getenv('KAFKA_SERVER')
 
-kafka_server = 'localhost:9092'
 
 # Video Generation
 def generate_video(image_folder):

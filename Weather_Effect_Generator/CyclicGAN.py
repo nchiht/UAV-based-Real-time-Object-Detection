@@ -5,7 +5,7 @@ from PIL import Image
 from tqdm import tqdm  # Changed from tqdm.notebook to tqdm
 from lib.gan_networks import define_G
 import torchvision.transforms as transforms
-# from _constants import *
+from _constants import *
 
 
 def __transforms2pil_resize(method):
@@ -86,8 +86,8 @@ if __name__ == '__main__':
     pretrained_model_path = "Weather_Effect_Generator/Cyclic_GAN/clear2rainy.pth"
     gan, image_transforms = create_model_and_transform(pretrained=pretrained_model_path)
 
-    images_path = f'data/UAV-benchmark-M/M0202'
-    save_folder = f'data/UAV-benchmark-M/M0202_wt'
+    images_path = f'data/UAV-benchmark-M/{set_weather}'
+    save_folder = f'data/UAV-benchmark-M/{set_weather}_wt'
 
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)

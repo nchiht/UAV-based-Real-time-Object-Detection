@@ -3,6 +3,8 @@ findspark.init()
 
 # Standard library imports
 from time import sleep
+import sys
+sys.path.append('./')
 from _constants import *
 
 # Third-party imports

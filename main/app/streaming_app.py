@@ -1,6 +1,8 @@
 from kafka import KafkaConsumer
 from flask import Flask, Response, render_template, request, url_for
 import numpy as np
+import sys
+sys.path.append('./')
 from _constants import *
 from time import sleep
 
@@ -41,5 +43,4 @@ def UAV3():
     return Response(get_video_stream(topic_out_3), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
-    # Wait for the query writing data
     app.run(debug=True)

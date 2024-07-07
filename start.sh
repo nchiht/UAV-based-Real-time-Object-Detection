@@ -1,2 +1,2 @@
-/home/cthi/Downloads/kafka/kafka_2.12-3.7.1/bin/zookeeper-server-start.sh /home/cthi/Downloads/kafka/kafka_2.12-3.7.1/config/zookeeper.properties |
-/home/cthi/Downloads/kafka/kafka_2.12-3.7.1/bin/kafka-server-start.sh  /home/cthi/Downloads/kafka/kafka_2.12-3.7.1/config/server.properties
+bin/zookeeper-server-start.sh config/zookeeper.properties
+bin/kafka-server-start.sh  config/server.properties

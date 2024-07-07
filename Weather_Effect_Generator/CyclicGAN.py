@@ -5,6 +5,8 @@ from PIL import Image
 from tqdm import tqdm  # Changed from tqdm.notebook to tqdm
 from lib.gan_networks import define_G
 import torchvision.transforms as transforms
+import sys
+sys.path.append('./')
 from _constants import *
 
 
@@ -31,12 +33,6 @@ def get_transform(load_size, crop_size, method=transforms.InterpolationMode.BICU
     return transforms.Compose(transform_list)
 
 def tensor2im(input_image, imtype=np.uint8):
-    """"Converts a Tensor array into a numpy image array.
-
-    Parameters:
-        input_image (tensor) --  the input image tensor array
-        imtype (type)        --  the desired type of the converted numpy array
-    """
     if not isinstance(input_image, np.ndarray):
         if isinstance(input_image, torch.Tensor):
             image_tensor = input_image.data
@@ -83,11 +79,10 @@ def run_inference(img_path, model, transform):
     return Image.fromarray(out)
 
 if __name__ == '__main__':
-    pretrained_model_path = "Weather_Effect_Generator/Cyclic_GAN/clear2rainy.pth"
-    gan, image_transforms = create_model_and_transform(pretrained=pretrained_model_path)
+    gan, image_transforms = create_model_and_transform(pretrained=pretrained_model_rainy)
 
-    images_path = f'data/UAV-benchmark-M/{set_weather}'
-    save_folder = f'data/UAV-benchmark-M/{set_weather}_wt'
+    images_path = set_weather
+    save_folder = folder_weather
 
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
@@ -95,7 +90,6 @@ if __name__ == '__main__':
     for img in os.listdir(images_path):
         trg = os.path.join(images_path, img)
         src = os.path.join(save_folder, img.split('.')[0] + "_rgan.jpg")
-
         if not os.path.exists(src):
             out = run_inference(img_path=trg, model=gan, transform=image_transforms)
             out.save(src)

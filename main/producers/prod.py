@@ -6,17 +6,13 @@ from json import dumps, loads
 from time import sleep
 from kafka import KafkaProducer
 logging.basicConfig(level=logging.INFO)
+from sys import path
+path.append('./')
 from _constants import *
-
-# from dotenv import load_dotenv
-# load_dotenv()
-
-# kafka_server = os.getenv('KAFKA_SERVER')
 
 
 # Video Generation
 def generate_video(image_folder):
-    # image_folder = '/home/cthi/UIT/IE212/UAV-benchmark-M/M0101'
     folder_name = image_folder.split('/')[-1]
     video_path = 'data/videos/' + folder_name + '.mp4'
 

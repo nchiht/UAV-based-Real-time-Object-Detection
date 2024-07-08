@@ -3,6 +3,8 @@ findspark.init()
 
 # Standard library imports
 from time import sleep
+from sys import path
+path.append('./')
 from _constants import *
 
 # Third-party imports
@@ -21,7 +23,7 @@ from pyspark.sql.types import BinaryType
 
 packages = [
     f'org.apache.spark:spark-sql-kafka-0-10_{scala_version}:{spark_version}',
-    'org.apache.kafka:kafka-clients:3.7.0'
+    f'org.apache.kafka:kafka-clients:{kafka_version}'
 ]
 spark = SparkSession \
 .builder \
@@ -31,7 +33,7 @@ spark = SparkSession \
 .config("spark.driver.memory", "16g") \
 .config("spark.python.worker.reuse", "true") \
 .config("spark.sql.execution.arrow.pyspark.enabled", "true") \
-.config("spark.sql.execution.arrow.maxRecordsPerBatch", "5") \
+.config("spark.sql.execution.arrow.maxRecordsPerBatch", "16") \
 .config("spark.scheduler.mode", "FAIR")  \
 .config("spark.jars.packages", ",".join(packages)) \
 .getOrCreate()
@@ -42,9 +44,9 @@ conf=SparkConf()
 
 print(spark)
 
-yolo = YOLO("../params/pt_yolov5n.pt")
-# yolo = YOLO("../params/pt_yolov8s.pt") 
-# yolo = YOLO("../params/pt_yolov8n.pt")  
+yolo = YOLO(yolov5n)
+# yolo = YOLO(yolov8s) 
+# yolo = YOLO(yolov8n)  
 
 # Broadcast model
 sc = SparkContext.getOrCreate()
@@ -67,7 +69,7 @@ def predict(frame_bytes):
 predict_udf = udf(predict, BinaryType())
 
 def queryWriter(topic_in, topic_out, checkpointPath):
-    streamRawDF = spark.readStream.format("kafka").option("kafka.bootstrap.servers", kafka_server).option("subscribe", topic_in).option("startingOffsets","latest").load()
+    streamRawDF = spark.readStream.format("kafka").option("kafka.bootstrap.servers", kafka_server).option("subscribe", topic_in).option("startingOffsets","earliest").load()
 
     streamRawDF = streamRawDF.withColumn('value1', col('value'))
     streamRawDF = streamRawDF.drop('value')
@@ -77,14 +79,10 @@ def queryWriter(topic_in, topic_out, checkpointPath):
     .format("kafka") \
     .option("kafka.bootstrap.servers", kafka_server) \
     .option('topic', topic_out) \
-    .option("checkpointLocation", f'../checkpoint/' + checkpointPath) \
-    # .trigger(processingTime="3 seconds")
+    .option("checkpointLocation", f'checkpoint/' + checkpointPath) \
+    .trigger(processingTime="3 seconds")
 
     return query
-
-checkpoint_1 = 'uav1'
-checkpoint_2 = 'uav2'
-checkpoint_3 = 'uav3'
 
 query_1 = queryWriter(topic_in_1, topic_out_1, checkpoint_1)
 query_2 = queryWriter(topic_in_2, topic_out_2, checkpoint_2)
@@ -93,3 +91,5 @@ query_3 = queryWriter(topic_in_3, topic_out_3, checkpoint_3)
 query_1.start() 
 query_2.start()
 query_3.start()
+
+spark.streams.awaitAnyTermination()

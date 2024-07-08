@@ -1,6 +1,8 @@
 from kafka import KafkaConsumer
 from flask import Flask, Response, render_template, request, url_for
 import numpy as np
+from sys import path
+path.append('./')
 from _constants import *
 from time import sleep
 
@@ -9,6 +11,7 @@ def get_video_stream(uavID):
     consumer = KafkaConsumer(
         topic,
         bootstrap_servers = [kafka_server],
+        auto_offset_reset = 'earliest'
     )
     sleep(5)
     for msg in consumer:

@@ -8,12 +8,12 @@ from time import sleep
 
 def get_video_stream(uavID):
     topic = uavID
+    sleep(5)
     consumer = KafkaConsumer(
         topic,
         bootstrap_servers = [kafka_server],
-        auto_offset_reset = 'earliest'
+        # auto_offset_reset = 'earliest'
     )
-    sleep(5)
     for msg in consumer:
         try:
             yield (b"--frame\r\n" b"Content-Type: image/jpg\r\n\r\n" + msg.value + b'\r\n\r\n')

@@ -26,7 +26,7 @@ def generate_video(image_folder):
 
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')  # XVID codec
     fourcc = cv2.VideoWriter_fourcc(*'MP4V')  # XVID codec
-    video = cv2.VideoWriter(video_path, fourcc, 30, (width, height))
+    video = cv2.VideoWriter(video_path, fourcc, 20, (width, height))
 
     # Appending the images to the video one by one 
     for image in images:  

@@ -28,6 +28,64 @@ comprehensive and accurate comparison.
 
 ![](images/prediction.jpg)
 
-## IV. Pipeline Lineage
+For the weather generator, we used CycleGan at [here](https://github.com/hgupta01/Weather_Effect_Generator)
+
+![](Weather_Effect_Generator/images/weather_effect.jpg)
+
+## IV. Workflow
 
 ![](images/System.png)
+
+## V. Setup
+
+The repo is developed on Ubuntu 22.04. Make sure to get the compatible packages and prerequisites if you try to run this
+on Windows. Also, be careful with OS-related errors or warnings.
+
+### Prerequisites
+
+- Python 3.10
+- [Spark 3.5.1](https://downloads.apache.org/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz)
+- [Kafka 3.7.1 - 2.12(Scala)](https://downloads.apache.org/kafka/3.7.1/kafka_2.12-3.7.1.tgz)
+
+We configured 5 partitions for Kafka. Write down the path to Kafka for later setup.
+
+### Steps to deploy
+
+**1. Install packages and setup environment**
+
+- You can replace command lines within `start.sh` to below code and use `bash start.sh` to start the zookeeper and kafka
+server
+```bash
+/path/to/your/kafka/bin/zookeeper-server-start.sh /path/to/your/kafka/config/zookeeper.properties |
+/path/to/your/kafka/bin/kafka-server-start.sh  /path/to/your/kafka/config/server.properties
+```
+- Try to use virtual env in Python for better development stage.
+```bash
+# Install python libraries and dependencies
+pip install -r requirements.txt
+
+# Create a directory to store the data
+mkdir data
+```
+- Download UAVDT Benchmark dataset [here](https://drive.google.com/file/d/1m8KA6oPIRK_Iwt9TYFquC87vBc_8wRVc/view). Put 
+it within the created `data/` folder, then extract it out.
+
+**2. Start files**
+
+- Firstly, run the `main/app/streaming_app.py` file to start Flask app
+```bash
+python main/app/streaming_app.py
+```
+- Secondly, run the `main/spark_streaming.py` file to start Spark Structured Streaming query writer
+```bash
+python main/spark_streaming.py
+```
+- Finally, run the 3 producers within `main/producers`. We wanted to simulate weather rainy situation in `producer_3.py`.
+You can try it by running `Weather_Effect_Generator/CyclicGAN.py` with the configurable `set_weather` and
+`folder_weather` variables  in `_constants.py`, then change the `image_folder` in it to `folder_weather`.
+
+### Interfaces
+
+- http://localhost:5000: Flask app
+- http://localhost:4040: Spark UI
+

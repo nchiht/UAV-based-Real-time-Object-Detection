@@ -4,6 +4,7 @@ findspark.init()
 # Standard library imports
 from time import sleep
 from sys import path
+
 path.append('./')
 from _constants import *
 
@@ -20,27 +21,26 @@ from pyspark.sql.functions import col, udf
 from pyspark.sql.streaming import DataStreamReader
 from pyspark.sql.types import BinaryType
 
-
 packages = [
     f'org.apache.spark:spark-sql-kafka-0-10_{scala_version}:{spark_version}',
     f'org.apache.kafka:kafka-clients:{kafka_version}'
 ]
 spark = SparkSession \
-.builder \
-.appName("UAV Detection") \
-.master("local") \
-.config("spark.executor.memory", "16g") \
-.config("spark.driver.memory", "16g") \
-.config("spark.python.worker.reuse", "true") \
-.config("spark.sql.execution.arrow.pyspark.enabled", "true") \
-.config("spark.sql.execution.arrow.maxRecordsPerBatch", "16") \
-.config("spark.scheduler.mode", "FAIR")  \
-.config("spark.jars.packages", ",".join(packages)) \
-.getOrCreate()
+    .builder \
+    .appName("UAV Detection") \
+    .master("local") \
+    .config("spark.executor.memory", "16g") \
+    .config("spark.driver.memory", "16g") \
+    .config("spark.python.worker.reuse", "true") \
+    .config("spark.sql.execution.arrow.pyspark.enabled", "true") \
+    .config("spark.sql.execution.arrow.maxRecordsPerBatch", "16") \
+    .config("spark.scheduler.mode", "FAIR") \
+    .config("spark.jars.packages", ",".join(packages)) \
+    .getOrCreate()
 
 spark.sparkContext.setLogLevel("ERROR")
 
-conf=SparkConf()
+conf = SparkConf()
 
 print(spark)
 
@@ -54,10 +54,12 @@ broadcast_model = sc.broadcast(yolo)
 
 model = broadcast_model.value
 
+
 def load_and_preprocess_frames(frame_bytes):
     frame = np.frombuffer(frame_bytes, dtype=np.uint8)
     frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
     return frame
+
 
 def predict(frame_bytes):
     image = load_and_preprocess_frames(frame_bytes)
@@ -66,29 +68,35 @@ def predict(frame_bytes):
     print(buffer)
     return buffer.tobytes()
 
+
 predict_udf = udf(predict, BinaryType())
 
+
 def queryWriter(topic_in, topic_out, checkpointPath):
-    streamRawDF = spark.readStream.format("kafka").option("kafka.bootstrap.servers", kafka_server).option("subscribe", topic_in).option("startingOffsets","earliest").load()
+    streamRawDF = spark.readStream.format("kafka")  \
+        .option("kafka.bootstrap.servers", kafka_server).option("subscribe", topic_in)  \
+        .option("startingOffsets", "earliest")  \
+        .load()
 
     streamRawDF = streamRawDF.withColumn('value1', col('value'))
     streamRawDF = streamRawDF.drop('value')
     streamRawDF = streamRawDF.withColumn('value', predict_udf('value1'))
 
     query = streamRawDF.writeStream \
-    .format("kafka") \
-    .option("kafka.bootstrap.servers", kafka_server) \
-    .option('topic', topic_out) \
-    .option("checkpointLocation", f'checkpoint/' + checkpointPath) \
-    .trigger(processingTime="3 seconds")
+        .format("kafka") \
+        .option("kafka.bootstrap.servers", kafka_server) \
+        .option('topic', topic_out) \
+        .option("checkpointLocation", f'checkpoint/' + checkpointPath) \
+        .trigger(processingTime="3 seconds")
 
     return query
+
 
 query_1 = queryWriter(topic_in_1, topic_out_1, checkpoint_1)
 query_2 = queryWriter(topic_in_2, topic_out_2, checkpoint_2)
 query_3 = queryWriter(topic_in_3, topic_out_3, checkpoint_3)
 
-query_1.start() 
+query_1.start()
 query_2.start()
 query_3.start()
 
